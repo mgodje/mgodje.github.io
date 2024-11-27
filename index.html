@@ -5,7 +5,6 @@
   <!-- Basic Page Needs
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta charset="utf-8">
-  <title>Maryann Godje 😎</title>
   <meta name="description" content="">
   <meta name="author" content="">
 
@@ -15,30 +14,45 @@
 
   <!-- FONT
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" type="text/css">
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" type="text/css"> -->
   <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" type="text/css">
+  <title>Maryann Godje 😎</title>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/skeleton.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/fonts.css">
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="icon" type="image/png" href="images/favicon.png">
 
+
+  <!-- Scripts
+  –------------------------------------------------- -->
+  <!-- <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@<version>/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@<version>/examples/jsm/"
+      }
+    }
+  </script> -->
+
 </head>
 <body>
 
+  <canvas class="webgl"></canvas>
+  
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <div class="row">
-      <div class="twenty columns" style="margin-top: 5%">
+      <div class="twenty columns" style="margin-top: -12%">
         <h1>Maryann Godje</h1>
         <p>
             Hi, I'm Maryann Godje! I'm a current student at UC Santa Cruz studying Computer Science. 
@@ -50,15 +64,20 @@
         <a href="https://www.github.com/mgodje" class=""><img class="icon" src="images/GitHub.svg" alt="Icon for GitHub"></a>
         <!-- resume? -->
     </div>
+
+    <!-- Projects -->
     <div class="row">
       <div class="twenty columns">
         <h2>Projects</h2>
     </div>
+
+    <!-- Wildfire Evacuation thumbnail and title-->
     <div class="row">
       <div class="six columns">
         <h3>Wildfire Evacutaion (2024)</h3> <!-- add link -->
         <img class="thumbnail" src="images/wildfire_evacuation_thumbnail.png">
       </div>
+    <!-- Wildfire Evacuation description -->
     <div class="row">
       <div class="twenty columns">
         <p>
@@ -74,11 +93,13 @@
         </p>
   </div>
 
+  <!-- Apeiro thumbnail and title -->
   <div class="row">
     <div class="six columns">
       <h3> <a href="https://github.com/mgodje/Apeiro" > <i>Apeiro</i></a> (2024) </h3>
       <img class = "thumbnail" src="images/apeiro_thumbnail.png">
     </div>
+  <!-- Apeiro description -->
   <div class="row">
     <div class="twenty columns">
       <p>
@@ -93,6 +114,9 @@
         <b>Programming Languages used: Three.js and HTML</b> 
       </p> 
   </div>
+
+  <!-- Three.js  -->
+  <script type="module" src="js/main.js"></script>
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
