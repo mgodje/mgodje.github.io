@@ -1,0 +1,9 @@
+.icon {
+    width: 2cm;
+    height: 2cm;
+    margin: 4px;
+    border-radius: 4px;
+}
+.icon:hover {
+    opacity: 0.7;
+}
