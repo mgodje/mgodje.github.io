@@ -1,14 +1,30 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
-import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper.js'
+import gsap from 'gsap'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+
+/**
+ * Debug
+ */
+const gui = new GUI()
+
+const parameters = {
+    materialColor: '#ffeded'
+}
+
+gui
+    .addColor(parameters, 'materialColor')
+    .onChange(() =>
+    {
+        material.color.set(parameters.materialColor)
+        particlesMaterial.color.set(parameters.materialColor)
+    })
+    // hide controls display entirely
+    .hide()
 
 /**
  * Base
  */
-// Debug
-const gui = new GUI()
-
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
@@ -16,85 +32,118 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Lights
- */
-const ambientLight = new THREE.AmbientLight(0xffffff, 1)
-scene.add(ambientLight)
-
-// gui.add(ambientLight, 'intensity').min(0).max(3).step(0.001).name('ambientLight intensity')
-
-
-const directionalLight = new THREE.DirectionalLight(0x00fffc, 0.9)    
-directionalLight.position.set(1, .25, 0)
-scene.add(directionalLight)
-
-const hemishpereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.9)
-scene.add(hemishpereLight)
-
-const pointLight = new THREE.PointLight(0xff9000, 1.5)
-pointLight.position.set(1, -.5, 1)
-scene.add(pointLight)
-
-const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 6, 1, 1) 
-rectAreaLight.position.set(-1.5, 0, 1.5)    
-rectAreaLight.lookAt(new THREE.Vector3())
-scene.add(rectAreaLight)   
-
-const spotLight = new THREE.SpotLight(0x78ff00, 4.5, 10, Math.PI * 0.1, 0.25, 1)
-spotLight.position.set(0, 2, 3)
-scene.add(spotLight)
-spotLight.target.position.x = -1.5
-scene.add(spotLight.target)
-
-// Helpers
-// const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemishpereLight, 0.2) 
-// scene.add(hemisphereLightHelper)
-
-// const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 0.2)
-// scene.add(directionalLightHelper)
-
-// const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2)
-// scene.add(pointLightHelper)
-
-// const spotLightHelper = new THREE.SpotLightHelper(spotLight)
-// scene.add(spotLightHelper)
-
-// const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight)
-// scene.add(rectAreaLightHelper)
-
-/**
  * Objects
  */
+// Texture
+const textureLoader = new THREE.TextureLoader()
+const gradientTexture = textureLoader.load('textures/gradients/3.jpg')
+gradientTexture.magFilter = THREE.NearestFilter
+
 // Material
-const material = new THREE.MeshStandardMaterial()
-material.roughness = 0.4
+const material = new THREE.MeshToonMaterial({
+    color: parameters.materialColor,
+    gradientMap: gradientTexture
+})
+
+let sectionMeshes = []
 
 // Objects
-const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    material
-)
-sphere.position.x = - 1.5
+const objectsDistance = 4
 
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(0.75, 0.75, 0.75),
-    material
-)
+// Load Sun model
+// "Sun" (https://skfb.ly/6yGSx) by SebastianSosnowski is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+let sun; // Variable to store sun object
+const loader = new GLTFLoader();
+loader.load('./sun_model/scene.gltf', (gltf) => {
+    sun = gltf.scene;
+    sun.scale.set(0.09, 0.09, 0.09);  // Adjust size
+    sun.position.set(1.2, -5.25, 2);  // Adjust position
 
-const torus = new THREE.Mesh(
-    new THREE.TorusGeometry(0.3, 0.2, 32, 64),
-    material
-)
-torus.position.x = 1.5
+    scene.add(sun);
+    sectionMeshes.push(sun); // Add the Sun to sectionMeshes after loading
+}, undefined, (error) => {
+    console.error('Error loading Sun model:', error);
+});
 
-const plane = new THREE.Mesh(
-    new THREE.PlaneGeometry(5, 5),
-    material
-)
-plane.rotation.x = - Math.PI * 0.5
-plane.position.y = - 0.65
 
-scene.add(sphere, cube, torus, plane)
+// NOT WORKING, NEED TO FIX LATER
+// // Load Earth Model
+// // "Earth" (https://skfb.ly/6TwGG) by Akshat is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+// let earth; // Variable to store earth object
+// const earthTexture = textureLoader.load('./earth_model/Material.002_diffuse.jpeg'); // Ensure the path is correct
+
+// loader.load('./earth_model/scene.gltf', (gltf) => {
+//     earth = gltf.scene;
+//     earth.scale.set(0.006, 0.006, 0.006);  // Adjust size
+//     earth.position.set(1, -4.5, 2);  // Adjust position
+
+//      // Apply texture to the first material found
+//      earth.traverse((child) => {
+//         if (child.isMesh) {
+//             child.material.map = earthTexture;
+//             child.material.needsUpdate = true; // Ensure update
+//         }
+//     });
+
+//     scene.add(earth);
+//     sectionMeshes.push(earth); // Add the Earth to sectionMeshes after loading
+// }, undefined, (error) => {
+//     console.error('Error loading Earth model:', error);
+// });
+
+// Load Moon Model
+// "Moon" (https://skfb.ly/6TwGU) by Akshat is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+let moon; // Variable to store moon object
+
+loader.load('./moon_model/scene.gltf', (gltf) => {
+    moon = gltf.scene;
+    moon.scale.set(0.009, 0.009, 0.009);  // Adjust size
+    moon.position.set(1.2, 0, 2);  // Adjust position
+
+    scene.add(moon);
+    sectionMeshes.push(moon); // Add the Moon to sectionMeshes after loading
+}, undefined, (error) => {
+    console.error('Error loading Moon model:', error);
+});
+
+
+/**
+ * Lights
+ */
+const directionalLight = new THREE.DirectionalLight('#ffffff', 3)
+directionalLight.position.set(1, 1, 1)
+scene.add(directionalLight)
+
+const ambientLight = new THREE.AmbientLight('#ffffff', 1.5);
+scene.add(ambientLight);
+
+/**
+ * Particles
+ */
+// Geometry
+const particlesCount = 400
+const positions = new Float32Array(particlesCount * 3)
+
+for(let i = 0; i < particlesCount; i++)
+{
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 10
+    positions[i * 3 + 1] = objectsDistance * 0.5 - Math.random() * objectsDistance * (sectionMeshes.length + 5.75)
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+}
+
+const particlesGeometry = new THREE.BufferGeometry()
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+// Material
+const particlesMaterial = new THREE.PointsMaterial({
+    color: parameters.materialColor,
+    sizeAttenuation: true,
+    size: 0.03
+})
+
+// Points
+const particles = new THREE.Points(particlesGeometry, particlesMaterial)
+scene.add(particles)
 
 /**
  * Sizes
@@ -122,46 +171,98 @@ window.addEventListener('resize', () =>
 /**
  * Camera
  */
-// Base camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 1
-camera.position.y = 1
-camera.position.z = 2
-scene.add(camera)
+// Group
+const cameraGroup = new THREE.Group()
+scene.add(cameraGroup)
 
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
+// Base camera
+const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
+camera.position.z = 6
+cameraGroup.add(camera)
 
 /**
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
+ * Scroll
+ */
+let scrollY = window.scrollY
+let currentSection = 0
+
+window.addEventListener('scroll', () => {
+    scrollY = window.scrollY;
+    const newSection = Math.round(scrollY / sizes.height);
+
+    if (newSection !== currentSection) {
+        currentSection = newSection;
+
+        const targetMesh = sectionMeshes[currentSection]; // Get the current mesh
+
+        if (targetMesh) { // Check if the mesh exists
+            gsap.to(targetMesh.rotation, {
+                duration: 1.5,
+                ease: 'power2.inOut',
+                x: '+=6',
+                y: '+=3',
+                z: '+=1.5'
+            });
+        }
+    }
+});
+
+/**
+ * Cursor
+ */
+const cursor = {}
+cursor.x = 0
+cursor.y = 0
+
+window.addEventListener('mousemove', (event) =>
+{
+    cursor.x = event.clientX / sizes.width - 0.7
+    cursor.y = event.clientY / sizes.height - 0.7
+})
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
+let previousTime = 0
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
 
-    // Update objects
-    sphere.rotation.y = 0.1 * elapsedTime
-    cube.rotation.y = 0.1 * elapsedTime
-    torus.rotation.y = 0.1 * elapsedTime
+    // Animate camera
+    camera.position.y = - scrollY / sizes.height * objectsDistance
 
-    sphere.rotation.x = 0.15 * elapsedTime
-    cube.rotation.x = 0.15 * elapsedTime
-    torus.rotation.x = 0.15 * elapsedTime
+    const parallaxX = cursor.x * 0.7
+    const parallaxY = - cursor.y * 0.7
+    cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 7 * deltaTime
+    cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 7 * deltaTime
 
-    // Update controls
-    controls.update()
+    // Animate meshes
+    for(const mesh of sectionMeshes)
+    {
+        mesh.rotation.x += deltaTime * 0.1
+        mesh.rotation.y += deltaTime * 0.12
+    }
+
+    // animate moon
+    if(moon)
+    {
+        moon.rotation.x += deltaTime * 0.09
+        moon.rotation.y += deltaTime * 0.06
+    }
 
     // Render
     renderer.render(scene, camera)
