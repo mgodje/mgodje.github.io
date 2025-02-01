@@ -1,5 +1,4 @@
-dist
 node_modules
-vite.config.js
-package-lock.json
-package.json
+dist
+static
+src
