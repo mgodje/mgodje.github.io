@@ -84,6 +84,8 @@ footer {
   text-align: center;
   background: rgba(10, 10, 10, 0.8);
   width: 100vw;
+  /* make source code clickable */
+  cursor: pointer;
 }
 
 .section {
