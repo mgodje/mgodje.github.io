@@ -1,0 +1,11 @@
+Model Information:
+* title:	Hello World!
+* source:	https://sketchfab.com/3d-models/hello-world-99e8f36b1e8449839c36f510bd8a9ed6
+* author:	Mateusz Kołakowski (https://sketchfab.com/geppettoo)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Hello World!" (https://sketchfab.com/3d-models/hello-world-99e8f36b1e8449839c36f510bd8a9ed6) by Mateusz Kołakowski (https://sketchfab.com/geppettoo) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

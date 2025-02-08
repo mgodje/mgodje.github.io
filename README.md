@@ -1,4 +1,5 @@
 # This is my website!
 
-<!-- lesson 19
-thank samir -->
+# Base code from Bruno Simon's lesson 19 of Three.js Journey: https://threejs-journey.com/lessons/scroll-based-animation
+
+# Thank you Samir for the Advice: https://github.com/smrghsh

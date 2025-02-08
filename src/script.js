@@ -50,63 +50,17 @@ let sectionMeshes = [];
 // Objects
 const objectsDistance = 4;
 
-// Load Sun model
-// "Sun" (https://skfb.ly/6yGSx) by SebastianSosnowski is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-let sun; // Variable to store sun object
 const loader = new GLTFLoader();
-loader.load(
-  "./sun_model/scene.gltf",
-  (gltf) => {
-    sun = gltf.scene;
-    sun.scale.set(0.09, 0.09, 0.09); // Adjust size
-    //Adjust this based on the width of the screen
-    sun.position.set(1.4, -5.25, 2); // Adjust position
-
-    scene.add(sun);
-    sectionMeshes.push(sun); // Add the Sun to sectionMeshes after loading
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading Sun model:", error);
-  }
-);
-
-// NOT WORKING, NEED TO FIX LATER
-// // Load Earth Model
-// // "Earth" (https://skfb.ly/6TwGG) by Akshat is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-// let earth; // Variable to store earth object
-// const earthTexture = textureLoader.load('./earth_model/Material.002_diffuse.jpeg'); // Ensure the path is correct
-
-// loader.load('./earth_model/scene.gltf', (gltf) => {
-//     earth = gltf.scene;
-//     earth.scale.set(0.006, 0.006, 0.006);  // Adjust size
-//     earth.position.set(1, -4.5, 2);  // Adjust position
-
-//      // Apply texture to the first material found
-//      earth.traverse((child) => {
-//         if (child.isMesh) {
-//             child.material.map = earthTexture;
-//             child.material.needsUpdate = true; // Ensure update
-//         }
-//     });
-
-//     scene.add(earth);
-//     sectionMeshes.push(earth); // Add the Earth to sectionMeshes after loading
-// }, undefined, (error) => {
-//     console.error('Error loading Earth model:', error);
-// });
 
 // Load Moon Model
 // "Moon" (https://skfb.ly/6TwGU) by Akshat is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 let moon; // Variable to store moon object
-
 loader.load(
   "./moon_model/scene.gltf",
   (gltf) => {
     moon = gltf.scene;
     moon.scale.set(0.009, 0.009, 0.009); // Adjust size
-    //adjust based on width
-    moon.position.set(1.4, 0, 2); // Adjust position
+    moon.position.set(0, 0, 2); // Adjust position
 
     scene.add(moon);
     sectionMeshes.push(moon); // Add the Moon to sectionMeshes after loading
@@ -114,6 +68,45 @@ loader.load(
   undefined,
   (error) => {
     console.error("Error loading Moon model:", error);
+  }
+);
+
+// Load Earth Model
+// "Hello World!" (https://skfb.ly/oSGTw) by Mateusz Kołakowski is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+let earth; // Variable to store earth object
+loader.load(
+  "./earth_model/scene.gltf",
+  (gltf) => {
+    earth = gltf.scene;
+    earth.scale.set(0.00001, 0.00001, 0.00001); // Adjust size
+    earth.position.set(0, -2.5, 2); // Adjust position
+
+    scene.add(earth);
+    sectionMeshes.push(earth); // Add the Earth to sectionMeshes after loading
+  },
+  undefined,
+  (error) => {
+    console.error("Error loading Earth model:", error);
+  }
+);
+
+// Load Sun model
+// "Sun" (https://skfb.ly/6yGSx) by SebastianSosnowski is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+let sun; // Variable to store sun object
+loader.load(
+  "./sun_model/scene.gltf",
+  (gltf) => {
+    sun = gltf.scene;
+    sun.scale.set(0.09, 0.09, 0.09); // Adjust size
+    //Adjust this based on the width of the screen
+    sun.position.set(0, -6, 2); // Adjust position
+
+    scene.add(sun);
+    sectionMeshes.push(sun); // Add the Sun to sectionMeshes after loading
+  },
+  undefined,
+  (error) => {
+    console.error("Error loading Sun model:", error);
   }
 );
 
@@ -279,6 +272,18 @@ const tick = () => {
   if (moon) {
     moon.rotation.x += deltaTime * 0.09;
     moon.rotation.y += deltaTime * 0.06;
+  }
+
+  // animate earth
+  if (earth) {
+    earth.rotation.x += deltaTime * 0.09;
+    earth.rotation.y += deltaTime * 0.06;
+  }
+
+  // animate sun
+  if (sun) {
+    sun.rotation.x += deltaTime * 0.09;
+    sun.rotation.y += deltaTime * 0.06;
   }
 
   // Render
