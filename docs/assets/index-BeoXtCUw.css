@@ -1,0 +1,266 @@
+@import url("https://fonts.googleapis.com/css2?family=Audiowide&family=Outfit:wght@100..900&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  color: #ffeded;
+  font-family: "Courier New", Courier, monospace;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a {
+  font-family: "Audiowide", serif;
+}
+p {
+  font-family: "Outfit", sans-serif;
+  font-weight: 150;
+  /* background: rgba(0, 0, 0, 0.8); */
+  border-radius: 2em;
+  padding: 0.5em;
+}
+a {
+  font-weight: 300;
+  color: white;
+}
+html {
+  background: #180124;
+}
+.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+.header-links {
+  /* an elegant button */
+  display: inline-block;
+  padding: 5px 10px;
+  margin: 7px 0;
+  border-radius: 5px;
+  background: #ffeded;
+  color: #180124;
+  text-decoration: none;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+/* with hover */
+.header-links:hover {
+  background: #180124;
+  color: #ffeded;
+}
+h1 {
+  text-transform: uppercase;
+  font-size: 2em;
+}
+.firstrow {
+  margin-top: 3em;
+  border-bottom: #ffeded 0.5px solid;
+  margin-bottom: 3em;
+  padding-bottom: 3em;
+}
+.project {
+  border-bottom: #ffeded 0.5px solid;
+  margin-bottom: 2em;
+}
+.project:last-child {
+  border-bottom: none;
+  margin-bottom: 10em;
+}
+footer {
+  margin-top: 0.5em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  font-size: 0.8em;
+  text-align: center;
+  background: rgba(10, 10, 10, 0.8);
+  width: 100vw;
+  /* make source code clickable */
+  cursor: pointer;
+}
+.section {
+  /* display: flex; */
+  /* justify-content: space-between; */
+  /* align-items: center; */
+  /* height: 100vh; */
+  position: relative;
+  color: #ffeded;
+  /* font-size: 7vmin; */
+  /* padding: 0 15%; */
+}
+section:nth-child(odd) {
+  justify-content: flex-end;
+}
+.icon {
+  width: 2cm;
+  height: 2cm;
+  margin: 4px;
+  border: 2px solid #ffeded;
+}
+.icon:hover {
+  opacity: 0.7;
+}
+.thumbnail {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin-bottom: 12px;
+  border: 3px solid rgb(249, 245, 229);
+
+}
+.eight{
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border-radius: 2em;
+  margin-bottom: 1em;
+}
+/* Center the page and leave space along both edges */
+.container {
+  position: relative;
+  width: calc(100% - 48px);
+  max-width: 960px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+/* Match the introduction and project column widths */
+.firstrow,
+.project.row {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+/* Override any previous column widths */
+.firstrow > .columns,
+.project.row > .columns {
+  float: none;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+/* Consistent spacing and a divider after every project */
+.project.row,
+.project.row:last-child {
+  padding: 32px 0;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 237, 237, 0.45);
+}
+/* Space between each project title and its images */
+.project h5 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+/* Larger images that keep their original proportions */
+.project .thumbnail {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 0 0 16px;
+  box-sizing: border-box;
+}
+/* Padding inside the description blocks */
+.firstrow > .eight.columns,
+.project.row > .eight.columns {
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border-radius: 24px;
+}
+.eight.columns p {
+  padding: 0;
+  line-height: 1.7;
+}
+.eight.columns p + p {
+  margin-top: 16px;
+}
+/* Space below the project list */
+footer {
+  position: relative;
+  width: 100%;
+  margin-top: 48px;
+}
+/* Stack columns when the screen gets narrow */
+@media (max-width: 760px) {
+  .firstrow,
+  .project.row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .container {
+    width: calc(100% - 32px);
+  }
+}
+.container h3 {
+  font-size: 2.0em;
+  margin-bottom: 24px;
+}
+.publications {
+  position: relative;
+  margin-top: 48px;
+}
+.publications h3 {
+  font-size: 36px;
+  margin-bottom: 24px;
+}
+.publication {
+  padding: 28px 0;
+  border-bottom: 1px solid rgba(255, 237, 237, 0.45);
+}
+.publication h5 {
+  font-size: 22px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.publication p {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.7;
+}
+/* Keep your name in the same font, with a stronger weight */
+.publication strong {
+  font-family: inherit;
+  font-weight: 700;
+}
+.publication .publication-venue {
+  opacity: 0.85;
+}
+.publication em {
+  font-family: inherit;
+}
+.publication .header-links {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .publications h3 {
+    font-size: 30px;
+  }
+
+  .publication h5 {
+    font-size: 19px;
+  }
+}
+.webgl {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.container,
+footer {
+  position: relative;
+  z-index: 1;
+}

@@ -1,117 +1,55 @@
 import * as THREE from "three";
-import GUI from "lil-gui";
-import gsap from "gsap";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 /**
- * Debug
+ * Basic setup
  */
-// const gui = new GUI()
-
-const parameters = {
-  materialColor: "#ffeded",
-};
-
-// gui
-//     .addColor(parameters, 'materialColor')
-//     .onChange(() =>
-//     {
-//         material.color.set(parameters.materialColor)
-//         particlesMaterial.color.set(parameters.materialColor)
-//     })
-//     // hide controls display entirely
-//     .hide()
-
-/**
- * Base
- */
-// Canvas
 const canvas = document.querySelector("canvas.webgl");
-
-// Scene
 const scene = new THREE.Scene();
 
-/**
- * Objects
- */
-// Texture
-const textureLoader = new THREE.TextureLoader();
-const gradientTexture = textureLoader.load("textures/gradients/3.jpg");
-gradientTexture.magFilter = THREE.NearestFilter;
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
 
-// Material
-const material = new THREE.MeshToonMaterial({
-  color: parameters.materialColor,
-  gradientMap: gradientTexture,
+// Use lighter rendering settings on small screens or touch devices.
+const lightweight = window.matchMedia(
+  "(max-width: 760px), (pointer: coarse)"
+).matches;
+
+/**
+ * Camera
+ */
+const cameraGroup = new THREE.Group();
+scene.add(cameraGroup);
+
+const camera = new THREE.PerspectiveCamera(
+  35,
+  sizes.width / sizes.height,
+  0.1,
+  100
+);
+
+camera.position.z = 6;
+cameraGroup.add(camera);
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  alpha: true,
+  antialias: !lightweight,
 });
 
-let sectionMeshes = [];
-
-// Objects
-const objectsDistance = 4;
-
-const loader = new GLTFLoader();
-
-// Load Moon Model
-// "Moon" (https://skfb.ly/6TwGU) by Akshat is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-let moon; // Variable to store moon object
-loader.load(
-  "./moon_model/scene.gltf",
-  (gltf) => {
-    moon = gltf.scene;
-    moon.scale.set(0.009, 0.009, 0.009); // Adjust size
-    moon.position.set(0, 0, 2); // Adjust position
-
-    scene.add(moon);
-    sectionMeshes.push(moon); // Add the Moon to sectionMeshes after loading
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading Moon model:", error);
-  }
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio || 1, lightweight ? 1 : 1.5)
 );
 
-// Load Earth Model
-// "Hello World!" (https://skfb.ly/oSGTw) by Mateusz Kołakowski is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-let earth; // Variable to store earth object
-loader.load(
-  "./earth_model/scene.gltf",
-  (gltf) => {
-    earth = gltf.scene;
-    earth.scale.set(0.00001, 0.00001, 0.00001); // Adjust size
-    earth.position.set(0, -2.5, 2); // Adjust position
-
-    scene.add(earth);
-    sectionMeshes.push(earth); // Add the Earth to sectionMeshes after loading
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading Earth model:", error);
-  }
-);
-
-// Load Sun model
-// "Sun" (https://skfb.ly/6yGSx) by SebastianSosnowski is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-let sun; // Variable to store sun object
-loader.load(
-  "./sun_model/scene.gltf",
-  (gltf) => {
-    sun = gltf.scene;
-    sun.scale.set(0.09, 0.09, 0.09); // Adjust size
-    //Adjust this based on the width of the screen
-    sun.position.set(0, -6, 2); // Adjust position
-
-    scene.add(sun);
-    sectionMeshes.push(sun); // Add the Sun to sectionMeshes after loading
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading Sun model:", error);
-  }
-);
+renderer.setSize(sizes.width, sizes.height);
 
 /**
- * Lights
+ * Lighting
  */
 const directionalLight = new THREE.DirectionalLight("#ffffff", 3);
 directionalLight.position.set(1, 1, 1);
@@ -121,19 +59,51 @@ const ambientLight = new THREE.AmbientLight("#ffffff", 1.5);
 scene.add(ambientLight);
 
 /**
- * Particles
+ * Model settings
+ *
+ * Each model occupies the center of one third of the page.
+ * Change size to adjust its relative diameter.
+ * Change horizontal to shift it left (-) or right (+).
  */
-// Geometry
-const particlesCount = 400;
+const models = [
+  {
+    name: "Moon",
+    path: "./moon_model/scene.gltf",
+    pageFraction: 1 / 6,
+    horizontal: 0.18,
+    size: 0.8,
+    group: null,
+  },
+  {
+    name: "Earth",
+    path: "./earth_model/scene.gltf",
+    pageFraction: 1 / 2,
+    horizontal: -0.18,
+    size: 0.9,
+    group: null,
+  },
+  {
+    name: "Sun",
+    path: "./sun_model/scene.gltf",
+    pageFraction: 5 / 6,
+    horizontal: 0.18,
+    size: 1,
+    group: null,
+  },
+];
+
+/**
+ * Stars
+ */
+const particlesCount = lightweight ? 180 : 400;
 const positions = new Float32Array(particlesCount * 3);
 
-for (let i = 0; i < particlesCount; i++) {
-  positions[i * 3 + 0] = (Math.random() - 0.5) * 10;
-  positions[i * 3 + 1] =
-    objectsDistance * 0.5 -
-    Math.random() * objectsDistance * (sectionMeshes.length + 5.75);
-  positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-}
+// Store random values once so stars do not jump around on resize.
+const starSeeds = Array.from({ length: particlesCount }, () => ({
+  x: Math.random(),
+  y: Math.random(),
+  z: Math.random(),
+}));
 
 const particlesGeometry = new THREE.BufferGeometry();
 particlesGeometry.setAttribute(
@@ -141,156 +111,244 @@ particlesGeometry.setAttribute(
   new THREE.BufferAttribute(positions, 3)
 );
 
-// Material
 const particlesMaterial = new THREE.PointsMaterial({
-  color: parameters.materialColor,
+  color: "#ffeded",
+  size: 0.025,
   sizeAttenuation: true,
-  size: 0.03,
 });
 
-// Points
-const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+const particles = new THREE.Points(
+  particlesGeometry,
+  particlesMaterial
+);
+
+// Positions change when the document changes size.
+particles.frustumCulled = false;
 scene.add(particles);
 
 /**
- * Sizes
+ * Page layout
  */
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
+let worldUnitsPerPixel = 1;
 
+function updateLayout() {
+  // Visible world dimensions at the models' depth (z = 0).
+  const visibleHeight =
+    2 *
+    Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) *
+    camera.position.z;
+
+  const visibleWidth = visibleHeight * camera.aspect;
+
+  worldUnitsPerPixel = visibleHeight / sizes.height;
+
+  const pageHeight = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight,
+    sizes.height
+  );
+
+  for (const model of models) {
+    if (!model.group) continue;
+
+    // Translate a location in the document into a world position.
+    const documentY = pageHeight * model.pageFraction;
+
+    model.group.position.set(
+      visibleWidth * model.horizontal,
+      -(documentY - sizes.height / 2) * worldUnitsPerPixel,
+      0
+    );
+
+    // Limit size by both screen width and height to fit phones.
+    const diameter =
+      Math.min(visibleWidth * 0.52, visibleHeight * 0.65) *
+      model.size;
+
+    // Loaded models are normalized to a radius of 1.
+    model.group.scale.setScalar(diameter / 2);
+  }
+
+  // Spread stars across the entire page, with some extra at each end.
+  const worldPageHeight = pageHeight * worldUnitsPerPixel;
+
+  for (let i = 0; i < particlesCount; i++) {
+    const seed = starSeeds[i];
+
+    positions[i * 3] = (seed.x - 0.5) * visibleWidth * 1.5;
+
+    positions[i * 3 + 1] =
+      visibleHeight -
+      seed.y * (worldPageHeight + visibleHeight);
+
+    positions[i * 3 + 2] = -seed.z * 3;
+  }
+
+  particlesGeometry.attributes.position.needsUpdate = true;
+
+  camera.position.y = -window.scrollY * worldUnitsPerPixel;
+}
+
+/**
+ * Load the models
+ */
+const loader = new GLTFLoader();
+
+// Model credits:
+// Moon: Akshat — https://skfb.ly/6TwGU
+// Earth ("Hello World!"): Mateusz Kołakowski — https://skfb.ly/oSGTw
+// Sun: SebastianSosnowski — https://skfb.ly/6yGSx
+// All licensed under CC BY 4.0:
+// https://creativecommons.org/licenses/by/4.0/
+
+async function loadModels() {
+  // Load one at a time to reduce simultaneous loading work.
+  for (const model of models) {
+    try {
+      const gltf = await loader.loadAsync(model.path);
+      const object = gltf.scene;
+
+      object.updateMatrixWorld(true);
+
+      // Different models use very different original scales.
+      // Find each model's center and normalize its size.
+      const bounds = new THREE.Box3().setFromObject(object);
+      const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+
+      if (
+        !Number.isFinite(sphere.radius) ||
+        sphere.radius <= 0
+      ) {
+        throw new Error("Model has invalid or empty bounds.");
+      }
+
+      const centered = new THREE.Group();
+      centered.add(object);
+      object.position.sub(sphere.center);
+
+      const normalized = new THREE.Group();
+      normalized.add(centered);
+      normalized.scale.setScalar(1 / sphere.radius);
+
+      // Rotate this outer group around the model's center.
+      const group = new THREE.Group();
+      group.add(normalized);
+
+      model.group = group;
+      scene.add(group);
+
+      updateLayout();
+
+      console.info(`${model.name} loaded successfully.`);
+    } catch (error) {
+      console.error(
+        `Could not load ${model.name} from ${model.path}:`,
+        error
+      );
+    }
+  }
+}
+
+/**
+ * Resizing and content changes
+ */
 window.addEventListener("resize", () => {
-  // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // Update renderer
   renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  updateLayout();
 });
 
-/**
- * Camera
- */
-// Group
-const cameraGroup = new THREE.Group();
-scene.add(cameraGroup);
+// Images and fonts can change the document height after it opens.
+let layoutFrame = 0;
 
-// Base camera
-const camera = new THREE.PerspectiveCamera(
-  35,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
-camera.position.z = 6;
-cameraGroup.add(camera);
+function scheduleLayout() {
+  cancelAnimationFrame(layoutFrame);
+  layoutFrame = requestAnimationFrame(updateLayout);
+}
 
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-  alpha: true,
-});
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const layoutObserver = new ResizeObserver(scheduleLayout);
+layoutObserver.observe(document.body);
+
+const container = document.querySelector(".container");
+
+if (container) {
+  layoutObserver.observe(container);
+}
+
+window.addEventListener("load", scheduleLayout);
+
+if (document.fonts) {
+  document.fonts.ready.then(scheduleLayout);
+}
 
 /**
- * Scroll
+ * Mouse parallax
  */
-let scrollY = window.scrollY;
-let currentSection = 0;
+const cursor = { x: 0, y: 0 };
 
-window.addEventListener("scroll", () => {
-  scrollY = window.scrollY;
-  const newSection = Math.round(scrollY / sizes.height);
+if (!lightweight) {
+  window.addEventListener("mousemove", (event) => {
+    cursor.x = event.clientX / sizes.width - 0.5;
+    cursor.y = event.clientY / sizes.height - 0.5;
+  });
 
-  if (newSection !== currentSection) {
-    currentSection = newSection;
+  document.addEventListener("mouseleave", () => {
+    cursor.x = 0;
+    cursor.y = 0;
+  });
+}
 
-    const targetMesh = sectionMeshes[currentSection]; // Get the current mesh
+/**
+ * Animation
+ */
+let previousTime = null;
+let lastRenderTime = -Infinity;
 
-    if (targetMesh) {
-      // Check if the mesh exists
-      gsap.to(targetMesh.rotation, {
-        duration: 1.5,
-        ease: "power2.inOut",
-        x: "+=6",
-        y: "+=3",
-        z: "+=1.5",
-      });
-    }
+function tick(time) {
+  requestAnimationFrame(tick);
+
+  // Render at approximately 30 FPS on smaller/touch devices.
+  if (lightweight && time - lastRenderTime < 1000 / 30) {
+    return;
   }
-});
 
-/**
- * Cursor
- */
-const cursor = {};
-cursor.x = 0;
-cursor.y = 0;
+  lastRenderTime = time;
 
-window.addEventListener("mousemove", (event) => {
-  cursor.x = event.clientX / sizes.width - 0.7;
-  cursor.y = event.clientY / sizes.height - 0.7;
-});
+  const deltaTime =
+    previousTime === null
+      ? 0
+      : Math.min((time - previousTime) / 1000, 0.05);
 
-/**
- * Animate
- */
-const clock = new THREE.Clock();
-let previousTime = 0;
+  previousTime = time;
 
-const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
-  const deltaTime = elapsedTime - previousTime;
-  previousTime = elapsedTime;
+  // Scroll the camera through the full background.
+  camera.position.y = -window.scrollY * worldUnitsPerPixel;
 
-  // Animate camera
-  camera.position.y = (-scrollY / sizes.height) * objectsDistance;
+  // Gentle desktop parallax.
+  const smoothing = 1 - Math.exp(-5 * deltaTime);
 
-  const parallaxX = cursor.x * 0.7;
-  const parallaxY = -cursor.y * 0.7;
   cameraGroup.position.x +=
-    (parallaxX - cameraGroup.position.x) * 7 * deltaTime;
+    (cursor.x * 0.15 - cameraGroup.position.x) * smoothing;
+
   cameraGroup.position.y +=
-    (parallaxY - cameraGroup.position.y) * 7 * deltaTime;
+    (-cursor.y * 0.15 - cameraGroup.position.y) * smoothing;
 
-  // Animate meshes
-  for (const mesh of sectionMeshes) {
-    mesh.rotation.x += deltaTime * 0.1;
-    mesh.rotation.y += deltaTime * 0.12;
+  for (const model of models) {
+    if (!model.group) continue;
+
+    model.group.rotation.x += deltaTime * 0.08;
+    model.group.rotation.y += deltaTime * 0.16;
   }
 
-  // animate moon
-  if (moon) {
-    moon.rotation.x += deltaTime * 0.09;
-    moon.rotation.y += deltaTime * 0.06;
-  }
-
-  // animate earth
-  if (earth) {
-    earth.rotation.x += deltaTime * 0.09;
-    earth.rotation.y += deltaTime * 0.06;
-  }
-
-  // animate sun
-  if (sun) {
-    sun.rotation.x += deltaTime * 0.09;
-    sun.rotation.y += deltaTime * 0.06;
-  }
-
-  // Render
   renderer.render(scene, camera);
+}
 
-  // Call tick again on the next frame
-  window.requestAnimationFrame(tick);
-};
-
-tick();
+updateLayout();
+loadModels();
+requestAnimationFrame(tick);
