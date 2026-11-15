@@ -297,3 +297,16 @@ footer {
   position: relative;
   z-index: 1;
 }
+
+.firstrow h2 {
+  font-size: 48px;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+/* Slightly smaller on phones */
+@media (max-width: 600px) {
+  .firstrow h2 {
+    font-size: 38px;
+  }
+}
